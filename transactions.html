@@ -1,0 +1,125 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>FairCoin - Statistics - Transactions and Blocks</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+
+    <script
+         src="https://code.jquery.com/jquery-1.11.2.min.js"
+         integrity="sha256-Ls0pXSlb7AYs7evhd+VLnWsZ/AqEHcXBeMZUycz/CcA="
+         crossorigin="anonymous"></script>
+<body>
+
+
+
+
+<div class="container">
+<h2>FairCoin - Statistics - Transactions and Blocks ( updated weekly )</h2>
+<div>
+  <canvas id="chart"></canvas>
+</div>
+</div>
+<style>
+.container {
+  width: 80%;
+  margin: 15px auto;
+}
+</style>
+<script>
+
+
+  var J=json_load("../api/rawdata/tx_by_day.json");
+
+  var L=[];
+  var D=[];
+  var DA=[];
+  var B=[];
+
+  J.shift();
+
+  J.forEach(
+    function(v,i){
+      L.unshift(v.date);
+      D.unshift(v.tx_count - v.blocks);
+      B.unshift(v.blocks);
+      if(i<J.length-6){
+        var ma=0;
+        for(j=i+6;j>=i;j--){
+          ma+=J[j].tx_count-J[j].blocks;
+        }
+        DA.unshift( ma/7 );
+      } else {
+        DA.unshift("");
+      }
+    }
+  );
+
+  var ctx = document.getElementById('chart').getContext('2d');
+
+
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: L,
+      datasets: [{
+          label: 'daily tx count weekly moving average',
+          data: DA,
+          fill:false,
+          backgroundColor:"rgba(0,0,0,0)",
+          borderColor:"rgba(0, 0, 0, 1)",
+          borderWidth: 2
+        },
+        {
+            label: 'daily generated blocks',
+            data: B,
+            fill:false,
+            backgroundColor:"rgba(0,0,0,0)",
+            borderColor:"rgba(100, 100, 100, 1)",
+            borderWidth: 2,
+            yAxisID:"1"
+          },{
+        label: 'daily tx count',
+        data: D,
+        backgroundColor: "rgba( 32, 178, 170  ,0.8)",
+        borderColor:"rgba(19, 100, 96, 1)",
+        borderWidth: 2
+      }
+
+      ]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    suggestedMin: 0,
+                    suggestedMax: 500
+                }
+            },{
+                id:"1",
+                ticks: {
+                    suggestedMin: 0,
+                    suggestedMax: 500
+                }
+            }]
+        }
+    }
+  });
+
+
+  function json_load( url ){
+    var json = null;
+    $.ajax({
+        'async': false,
+        'global': false,
+        'cache': false,
+        'url': url,
+        'dataType': "json",
+        'success': function (data) {
+            json = data;
+        }
+    });
+    return json;
+  }
+
+</script>
+</body>

@@ -1,0 +1,114 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>FairCoin - Statistics - CoinGecko.com Ranking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+
+    <script
+         src="https://code.jquery.com/jquery-1.11.2.min.js"
+         integrity="sha256-Ls0pXSlb7AYs7evhd+VLnWsZ/AqEHcXBeMZUycz/CcA="
+         crossorigin="anonymous"></script>
+<body>
+
+
+
+
+<div class="container">
+<h2>FairCoin - Statistics - CoinGecko.com Ranking ( updated regulary )</h2>
+<div>
+  <canvas id="chart"></canvas>
+</div>
+</div>
+<style>
+.container {
+  width: 80%;
+  margin: 15px auto;
+}
+</style>
+<script>
+
+
+  var J=json_load("../api/rawdata/coingecko_ranking.csv");
+
+  var J=J.split(/\n/g);
+
+  var L=[];
+  var D=[];
+  var S=[];
+
+  J.forEach(
+    function(v,i){
+      var JJ=v.split(/,/g);
+      if(JJ.length == 3 ){
+        L.push(JJ[0]);
+        D.push(JJ[1]);
+        S.push(JJ[2]);
+      }
+    }
+  );
+
+  console.log( L, D );
+  var ctx = document.getElementById('chart').getContext('2d');
+
+
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: L,
+      datasets: [
+        {
+        label: 'daily coingecko ranking',
+        fill:false,
+        backgroundColor:"rgba(0,0,0,0)",
+        data: D,
+        borderColor:"rgba(0, 0, 0, 1)",
+        borderWidth: 2
+      },{
+        label: 'daily coingecko score',
+        fill:true,
+        data: S,
+        backgroundColor: "rgba(   32, 178, 170  ,0.8)",
+        borderColor:"rgba(19, 100, 96, 1)",
+        borderWidth: 2,
+        yAxisID:"1"
+      }
+
+      ]
+    },
+    options: {
+        scales: {
+          yAxes: [{
+              ticks: {
+                  suggestedMin: 0,
+                  suggestedMax: 200,
+                  reverse:true
+              }
+          },{
+              id:"1",
+              ticks: {
+                  suggestedMin: 0,
+                  suggestedMax: 100
+              }
+          }]
+        }
+    }
+  });
+
+
+  function json_load( url ){
+    var json = null;
+    $.ajax({
+        'async': false,
+        'global': false,
+        'cache': false,
+        'url': url,
+        'dataType': "text",
+        'success': function (data) {
+            json = data;
+        }
+    });
+    return json;
+  }
+
+</script>
+</body>
