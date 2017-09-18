@@ -1,45 +1,100 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>FairCoin - Statistics - CoinGecko.com Ranking</title>
+    <titleFairCoin - Statistics - CoinGecko.com Ranking</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 
     <script
          src="https://code.jquery.com/jquery-1.11.2.min.js"
          integrity="sha256-Ls0pXSlb7AYs7evhd+VLnWsZ/AqEHcXBeMZUycz/CcA="
          crossorigin="anonymous"></script>
+
+     <style>
+       table {
+         font-size:0.8em;
+       }
+       .button_api {
+         text-align:right;
+       }
+
+     </style>
 <body>
 
-
-
-
 <div class="container">
-<h2>FairCoin - Statistics - CoinGecko.com Ranking ( updated regulary )</h2>
-<div>
-  <canvas id="chart"></canvas>
+  <div class="row">
+    <div class="col">
+      <h2>FairCoin - Statistics - CoinGecko.com Ranking ( updated regulary )</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <table class="table table-sm" style="width:30em;">
+        <tr>
+          <td>last ranking</td>
+          <td><span id="last"></span></td>
+          <td><span id="last_label"></span></td>
+        </tr>
+        <tr>
+          <td>best ranking</td>
+          <td><span id="best"></span></td>
+          <td><span id="best_label"></span></td>
+        </tr>
+      </table>
+    </div>
+    <div class="col">
+      <table class="table table-sm" style="width:30em;">
+        <tr>
+          <td>last value</td>
+          <td><span id="lastv"></span></td>
+          <td><span id="lastv_label"></span></td>
+        </tr>
+        <tr>
+          <td>best value</td>
+          <td><span id="bestv"></span></td>
+          <td><span id="bestv_label"></span></td>
+        </tr>
+      </table>
+    </div>
+    <div class="col button_api">
+      <a href="http://statistics.fairplayground.info"><button class="btn btn-sm btn-outline-dark">Statistics</button></html>
+      <a href="http://api.fairplayground.info/rawdata/coingecko_ranking.csv"><button class="btn btn-sm btn-outline-primary">API [csv]</button></html>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
 </div>
-</div>
-<style>
-.container {
-  width: 80%;
-  margin: 15px auto;
-}
-</style>
 <script>
 
 
-  var J=json_load("../api/rawdata/coingecko_ranking.csv");
+  var J=json_load("http://api.fairplayground.info/rawdata/coingecko_ranking.csv");
 
   var J=J.split(/\n/g);
 
   var L=[];
   var D=[];
   var S=[];
+  var best=1000;      // best ranking
+  var best_label=""   // date label
+  var bestv=0         // best value
+  var bestv_label=""  // date label
 
   J.forEach(
     function(v,i){
       var JJ=v.split(/,/g);
+
       if(JJ.length == 3 ){
+        if( parseInt( JJ[1] ) < best ){
+          best = JJ[1];
+          best_label = JJ[0];
+        }
+        if( parseInt( JJ[2] ) > bestv ){
+          bestv = JJ[2];
+          bestv_label = JJ[0];
+        }
         L.push(JJ[0]);
         D.push(JJ[1]);
         S.push(JJ[2]);
@@ -47,7 +102,15 @@
     }
   );
 
-  console.log( L, D );
+  $("#last").text( D[ D.length-1 ] );
+  $("#last_label").text( L[ D.length-1 ] );
+  $("#best").text(best);
+  $("#best_label").text(best_label);
+  $("#lastv").text( S[ S.length-1 ] );
+  $("#lastv_label").text( L[ S.length-1 ] );
+  $("#bestv").text(bestv);
+  $("#bestv_label").text(bestv_label);
+
   var ctx = document.getElementById('chart').getContext('2d');
 
 

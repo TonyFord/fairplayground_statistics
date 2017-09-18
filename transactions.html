@@ -2,38 +2,77 @@
 <head>
     <meta charset="utf-8"/>
     <title>FairCoin - Statistics - Transactions and Blocks</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 
     <script
          src="https://code.jquery.com/jquery-1.11.2.min.js"
          integrity="sha256-Ls0pXSlb7AYs7evhd+VLnWsZ/AqEHcXBeMZUycz/CcA="
          crossorigin="anonymous"></script>
+    <style>
+      table {
+        font-size:0.8em;
+      }
+      .button_api {
+        text-align:right;
+      }
+
+    </style>
 <body>
 
 
 
 
 <div class="container">
-<h2>FairCoin - Statistics - Transactions and Blocks ( updated weekly )</h2>
-<div>
-  <canvas id="chart"></canvas>
+<div class="row">
+  <div class="col">
+    <h2>FairCoin - Statistics - Transactions and Blocks ( updated weekly )</h2>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <table class="table table-sm" style="width:30em;">
+      <tr>
+        <td>last tx count</td>
+        <td><span id="tx_last"></span></td>
+        <td><span id="tx_last_label"></span></td>
+      </tr>
+      <tr>
+        <td>maximum tx count</td>
+        <td><span id="tx_day"></span></td>
+        <td><span id="tx_day_label"></span></td>
+      </tr>
+      <tr>
+        <td>maximum 7 days moving average</td>
+        <td><span id="tx_avg"></span></td>
+        <td><span id="tx_avg_label"></span></td>
+      </tr>
+    </table>
+  </div>
+  <div class="col button_api">
+    <a href="http://statistics.fairplayground.info"><button class="btn btn-sm btn-outline-dark">Statistics</button></html>
+    <a href="http://api.fairplayground.info/rawdata/tx_by_day.json"><button class="btn btn-sm btn-outline-primary">API [json]</button></html>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <canvas id="chart"></canvas>
+  </div>
 </div>
 </div>
-<style>
-.container {
-  width: 80%;
-  margin: 15px auto;
-}
-</style>
 <script>
 
 
-  var J=json_load("../api/rawdata/tx_by_day.json");
+  var J=json_load("http://api.fairplayground.info/rawdata/tx_by_day.json");
 
-  var L=[];
-  var D=[];
-  var DA=[];
-  var B=[];
+  var L=[];             // date label
+  var D=[];             // daily tx
+  var DA=[];            // moving average
+  var B=[];             // blocks
+  var ma_max=0;         // max 7 days moving average
+  var ma_max_label="";  // date label
+  var tx_max=0;         //daily tx max
+  var tx_max_label="";  // date label
 
   J.shift();
 
@@ -41,18 +80,33 @@
     function(v,i){
       L.unshift(v.date);
       D.unshift(v.tx_count - v.blocks);
+      if( v.tx_count - v.blocks > tx_max ){
+        tx_max = v.tx_count - v.blocks;
+        tx_max_label = v.date;
+      }
       B.unshift(v.blocks);
       if(i<J.length-6){
         var ma=0;
         for(j=i+6;j>=i;j--){
           ma+=J[j].tx_count-J[j].blocks;
         }
-        DA.unshift( ma/7 );
+        if( Math.round(ma/7) > ma_max ){
+          ma_max = Math.round(ma/7);
+          ma_max_label=v.date;
+        }
+        DA.unshift( Math.round(ma/7) );
       } else {
         DA.unshift("");
       }
     }
   );
+
+  $("#tx_last").text( D[ D.length-1 ] );  // last tx count
+  $("#tx_last_label").text( L[ D.length-1 ] );  // last tx count
+  $("#tx_avg").text( ma_max );
+  $("#tx_avg_label").text( ma_max_label );
+  $("#tx_day").text( tx_max );
+  $("#tx_day_label").text( tx_max_label );
 
   var ctx = document.getElementById('chart').getContext('2d');
 
