@@ -1,0 +1,202 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <titleFairCoin - Statistics - FairMarket</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="http://fairplayground.info/assets/js/moments.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+
+    <script
+         src="https://code.jquery.com/jquery-1.11.2.min.js"
+         integrity="sha256-Ls0pXSlb7AYs7evhd+VLnWsZ/AqEHcXBeMZUycz/CcA="
+         crossorigin="anonymous"></script>
+
+     <style>
+       table {
+         font-size:0.8em;
+       }
+       .button_api {
+         text-align:right;
+       }
+
+     </style>
+<body>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h2>FairCoin - Statistics - FairMarket ( updated monthly )</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col button_api">
+      <a href="http://statistics.fairplayground.info"><button class="btn btn-sm btn-outline-dark">Statistics</button></a>
+      <a href="http://api.fairplayground.info/rawdata/fairmarket.csv"><button class="btn btn-sm btn-outline-primary">API [csv]</button></a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+</div>
+<script>
+
+
+  var J=json_load("http://api.fairplayground.info/rawdata/fairmarket.csv");
+
+  var J=J.split(/\n/g);
+
+  var L=[];
+  var D=[];
+  var S=[];
+  var M=[];
+
+  var d_sum=0;
+  var yy=0;
+  var mm=0;
+  var w_sum=0;
+  var last="";
+
+
+  J.forEach(
+    function(v,i){
+      var JJ=v.split(/,/g);
+
+      if(JJ.length == 2 ){
+
+        var LL = JJ[0].split(/\/| /g);
+        L.push( "20" + LL[2] + "-" + LL[1] + "-" + LL[0] );
+
+        d_sum += parseInt( JJ[1] );
+        S.push( { "x": "20" + LL[2] + "-" + LL[1] + "-" + LL[0], "y" : d_sum } );
+
+
+        if( last == "" ) last = "20" + LL[2] + "-" + LL[1] + "-" + LL[0];
+        if( last == "20" + LL[2] + "-" + LL[1] + "-" + LL[0] ){
+          w_sum += parseInt( JJ[1] );
+
+        } else {
+
+          var prev_date = new Date( new Date(last).setDate(new Date(last).getDate() - 1) );
+          var prev_dd=prev_date.getDate();
+          var prev_mm=prev_date.getMonth()+1;
+          var prev_yy=prev_date.getFullYear();
+          prev_dd = ( prev_dd < 10 ) ? "0" + prev_dd.toString() : prev_dd.toString();
+          prev_mm = ( prev_mm < 10 ) ? "0" + prev_mm.toString() : prev_mm.toString();
+          var prev_date=prev_yy + "-" + prev_mm + "-" + prev_dd;
+
+          var next_date = new Date( new Date(last).setDate(new Date(last).getDate() + 1) );
+          var next_dd=next_date.getDate();
+          var next_mm=next_date.getMonth()+1;
+          var next_yy=next_date.getFullYear();
+          next_dd = ( next_dd < 10 ) ? "0" + next_dd.toString() : next_dd.toString();
+          next_mm = ( next_mm < 10 ) ? "0" + next_mm.toString() : next_mm.toString();
+          var next_date=next_yy + "-" + next_mm + "-" + next_dd;
+
+          if( new Date( last ) != prev_date ){
+              D.push( { "x": prev_date, "y":0 } );
+          }
+
+          D.push( { "x": last, "y":w_sum } );
+
+          if( new Date( "20" + LL[2] + "-" + LL[1] + "-" + LL[0] ) != next_date ){
+              D.push( { "x": next_date, "y":0 } );
+          }
+          w_sum=parseInt( JJ[1] );
+          last = "20" + LL[2] + "-" + LL[1] + "-" + LL[0];
+        }
+      }
+    }
+  );
+
+
+
+  $("#last").text( D[ D.length-1 ] );
+  $("#last_label").text( L[ D.length-1 ] );
+
+  var ctx = document.getElementById('chart').getContext('2d');
+
+
+
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: L,
+      datasets: [
+        {
+          label: 'new products offered each day',
+          borderWidth:2,
+          data: D,
+          backgroundColor: "rgba(   0, 0, 0  ,0.5)",
+          borderColor:"rgba(0, 0, 0, 1)",
+          radius:2,
+          hitRadius:3,
+          lineTension:0
+        },
+        {
+        label: 'total new products offered each day',
+        fill:true,
+        data: S,
+        backgroundColor: "rgba(   32, 178, 170  ,0.5)",
+        borderColor:"rgba(19, 100, 96, 1)",
+        borderWidth: 2,
+        radius:0,
+        hitRadius:3,
+        lineTension:0,
+        yAxisID:"1"
+      }
+
+
+      ]
+    },
+    options: {
+      responsive: true,
+        scales: {
+          xAxes: [{
+						type: "time",
+						time: {
+							format: 'YYYY-MM-DD',
+							// round: 'day'
+							tooltipFormat: 'YYYY-MM-DD'
+						},
+						scaleLabel: {
+							display: true,
+							labelString: 'Date'
+						}
+					} ],
+          yAxes: [{
+              id:"0",
+              ticks: {
+                  suggestedMin: 0,
+                  suggestedMax: 50,
+              }
+          },{
+              id:"1",
+              ticks: {
+                  suggestedMin: 0,
+                  suggestedMax: 250
+              }
+          }]
+        }
+    }
+  });
+
+
+  function json_load( url ){
+    var json = null;
+    $.ajax({
+        'async': false,
+        'global': false,
+        'cache': false,
+        'url': url,
+        'dataType': "text",
+        'success': function (data) {
+            json = data;
+        }
+    });
+    return json;
+  }
+
+</script>
+</body>

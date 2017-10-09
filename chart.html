@@ -1,0 +1,389 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="http://fairplayground.info/assets/js/moments.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+
+    <script
+         src="https://code.jquery.com/jquery-1.11.2.min.js"
+         integrity="sha256-Ls0pXSlb7AYs7evhd+VLnWsZ/AqEHcXBeMZUycz/CcA="
+         crossorigin="anonymous"></script>
+
+     <style>
+       table {
+         font-size:0.8em;
+       }
+       .button_api {
+         text-align:right;
+       }
+       .intv > .col:first-child {
+          text-align: right;
+       }
+       button {
+         cursor:pointer;
+       }
+
+     </style>
+<body>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h2 id="_title"></h2>
+    </div>
+  </div>
+  <div class="row intv">
+    <div class="col-4">
+      <button type="button" class="btn btn-sm btn-primary" onclick="create_chart('1M',0,0)">1M</button>
+      <button type="button" class="btn btn-sm btn-primary" onclick="create_chart('3M',0,0)">3M</button>
+      <button type="button" class="btn btn-sm btn-primary" onclick="create_chart('6M',0,0)">6M</button>
+      <button type="button" class="btn btn-sm btn-primary" onclick="create_chart('1Y',0,0)">1Y</button>
+      <button type="button" class="btn btn-sm btn-primary" onclick="create_chart('3Y',0,0)">3Y</button>
+      <button type="button" class="btn btn-sm btn-primary" onclick="create_chart('ALL',0,0)">ALL</button>
+      <button type="button" class="btn btn-sm btn-primary" onclick="create_chart('CUSTOM',0,0)">CUSTOM</button>
+    </div>
+    <div class="col-4 input-group cstm invisible">
+      <input type="text" class="form-control" placeholder="YYYY-MM-DD" onkeyup="check_dt()">
+      <input type="text" class="form-control" placeholder="YYYY-MM-DD" onkeyup="check_dt()">
+    </div>
+    <div class="col-1 input-group lgtm">
+      <button type="button" class="btn btn-sm btn-default" onclick="$(this).toggleClass('btn-info'); myChart.destroy(); myChart=undefined; create_chart('ALL',0,0); setTimeout( function(){ create_chart('ALL',0,0) },1000);">LOG</button>
+    </div>
+    <div class="col button_api">
+      <a href="http://statistics.fairplayground.info"><button class="btn btn-sm btn-outline-dark">Statistics</button></a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+</div>
+<script>
+
+var setup;
+
+$( document ).ready(function() {
+  setup = getURLParameter('s');
+  if( setup == null ){
+    $(".container > .row:nth-child(3) > .col").html("<h3>no setup selected! please append URL parameter ?s={my_setup_id}</h3>");
+    console.log("no setup selected");
+    return;
+  }
+
+  SETUP = json_load( "setup/" + setup + ".json","json");
+  if( SETUP == null ){
+    $(".container > .row:nth-child(3) > .col").html("<h3>no setup found! please check your setup id</h3>");
+    console.log("no setup found");
+    return;
+  }
+
+  $("head title").text( SETUP.title );
+
+  load_sources();
+  load_data();
+
+  create_chart( "ALL",0,0);
+
+});
+
+function getURLParameter(name) {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+}
+
+function check_dt(){
+  var start = $(".cstm input:first-child").val();
+  var end = $(".cstm input:last-child").val();
+
+  if( end.length == 10 && start.length == 10 ){
+    if( new Date ( start ).toString() == "Invalid Date" ) return;
+    if( new Date ( end ).toString() == "Invalid Date" ) return;
+    if( new Date( start ) >= new Date ( end )) return;
+    var ivmin = JSON.stringify( new Date( start ) ).slice(1,11);
+    var ivmax = JSON.stringify( new Date( end   ) ).slice(1,11);
+    create_chart("",ivmin,ivmax);
+  }
+
+}
+
+var ctx = document.getElementById('chart').getContext('2d');
+
+var myChart;
+var SETUP;
+var DATA=Array();
+var SOURCES=Array();
+
+
+function load_sources(){
+
+  SETUP.sources.forEach(
+
+    function(v,i){
+      var D=json_load( v.content_url , v.type );
+      var D=D.split(/\n/g);
+      if( v.csv_headline == true ) D.shift();
+
+      i=D.length-1;
+      while( D[i].trim() == "" ){
+        D.pop();
+        i=D.length-1;
+      }
+
+      // update script
+      json_load( v.update ,"text");
+
+      // add API link/button
+      $(".button_api").append("<a href=\"http://statistics.fairplayground.info/setup/" + setup + ".json\"><button class=\"btn btn-sm btn-outline-primary\">SETUP[json]</button></a>");
+      $(".button_api").append("<a href=\"" + v.content_url + "\"><button class=\"btn btn-sm btn-outline-primary\">API [" + (( v.type == "text") ? "csv" : "json" ) + "]</button></a>");
+
+
+      SOURCES.push(D);
+    }
+
+  );
+
+}
+
+function load_data(){
+
+  SETUP.dataset.forEach(
+
+    function(v,i){
+      var D=SOURCES[v.source_id];
+      var DDD=[];
+      D.forEach(
+        function(w,i){
+          var DD=w.split(/,/g);
+          DDD.push( { "x":DD[0], "y":parseFloat( DD[v.datacolumn] ) } );
+        }
+      );
+      DATA.push(DDD);
+    }
+
+  );
+
+}
+
+function create_chart( iv, ivmin, ivmax ){
+
+  var iv_min="";
+  var iv_max="";
+
+  if( ivmin != 0 && ivmax != 0 ){
+
+    iv_min=ivmin;
+    iv_max=ivmax;
+
+  } else {
+
+    iv_max=JSON.stringify(new Date()).slice(1,11);
+
+    var yy=parseInt( JSON.stringify(new Date()).slice(1,5) );
+    var mm=parseInt( JSON.stringify(new Date()).slice(6,8) );
+    var dd=parseInt( JSON.stringify(new Date()).slice(9,11) );
+
+    $(".intv button").toggleClass("btn-primary",false);
+    $(".intv button").toggleClass("btn-default",true);
+    $(".cstm").toggleClass( "invisible",true );
+
+
+
+    switch( iv ){
+      case "CUSTOM":
+        $(".intv button:nth-child(7)").toggleClass("btn-primary",true);
+        $(".intv button:nth-child(7)").toggleClass("btn-default",false);
+        $(".cstm").toggleClass( "invisible",false );
+        return;
+      break;
+      case "ALL":
+        $(".intv button:nth-child(6)").toggleClass("btn-primary",true);
+        $(".intv button:nth-child(6)").toggleClass("btn-default",false);
+        iv_min="2014-01-01";
+      break;
+      case "1M":
+        $(".intv button:first-child").toggleClass("btn-primary",true);
+        $(".intv button:first-child").toggleClass("btn-default",false);
+        var iv_min = JSON.stringify( new Date( new Date(iv_max).setDate(new Date(iv_max).getDate()-30 ) ) ).slice(1,11);
+      break;
+      case "3M":
+        $(".intv button:nth-child(2)").toggleClass("btn-primary",true);
+        $(".intv button:nth-child(2)").toggleClass("btn-default",false);
+        var iv_min = JSON.stringify( new Date( new Date(iv_max).setDate(new Date(iv_max).getDate()-90 ) ) ).slice(1,11);
+      break;
+      case "6M":
+        $(".intv button:nth-child(3)").toggleClass("btn-primary",true);
+        $(".intv button:nth-child(3)").toggleClass("btn-default",false);
+        var iv_min = JSON.stringify( new Date( new Date(iv_max).setDate(new Date(iv_max).getDate()-180 ) ) ).slice(1,11);
+      break;
+      case "1Y":
+        $(".intv button:nth-child(4)").toggleClass("btn-primary",true);
+        $(".intv button:nth-child(4)").toggleClass("btn-default",false);
+        var iv_min = JSON.stringify( new Date( new Date(iv_max).setDate(new Date(iv_max).getDate()-365 ) ) ).slice(1,11);
+      break;
+      case "3Y":
+        $(".intv button:nth-child(5)").toggleClass("btn-primary",true);
+        $(".intv button:nth-child(5)").toggleClass("btn-default",false);
+        var iv_min = JSON.stringify( new Date( new Date(iv_max).setDate(new Date(iv_max).getDate()-3*365 ) ) ).slice(1,11);
+      break;
+    }
+  }
+
+  $(".cstm input:first-child").val( iv_min );
+  $(".cstm input:last-child").val( iv_max );
+
+
+
+
+  if( myChart == undefined ){
+
+    var L=[];
+
+    DATA[0].forEach(
+      function( v,i ){
+        L.push( v.x );
+      }
+    )
+
+    var CFGD={
+        data: {
+          labels: L,
+          datasets: []
+        },
+        options: {
+          scales: {
+            xAxes: [{
+    					time: {
+                min:iv_min,
+                max:iv_max
+    					},
+  				  }],
+            yAxes: [{
+               type: ( ( $( $(".lgtm button")[0] ).hasClass("btn-info") ) ? 'logarithmic' : 'linear' ),
+            }]
+          }
+        }
+      };
+
+    DATA.forEach(
+      function( v,i ){
+        CFGD.data.datasets.push({ "data" : v });
+       }
+    );
+
+    myChart = new Chart(ctx, $.extend( true, CFGD, SETUP.chartjs ) );
+
+    SETUP.dataset.forEach(
+      function( v,i ){
+        Y_MAX[v.yAxes]=0;
+      }
+    );
+
+  } else {
+
+    var st=false;
+    var E=Array();
+
+    myChart.data.datasets.forEach(
+      function( w,j){
+        E.push([]);
+        w.data.forEach(
+          function(v,i){
+
+            if( new Date( iv_max ) >= new Date( v.x ) && new Date( iv_min ) <= new Date( v.x ) ){
+              E[j].push( v.y );
+            }
+          }
+        );
+      }
+    );
+
+
+
+    var tcks="month";
+    var x_range=( new Date( iv_max ) - new Date( iv_min ) )/1000/3600/24/30;
+
+    if( x_range < 3 ){
+      tcks="day";
+    } else if( x_range < 7 ) {
+      tcks="week";
+    }
+
+    yaxes( E );
+
+    myChart.options.scales.xAxes[0].time.min = iv_min;
+    myChart.options.scales.xAxes[0].time.max = iv_max;
+    myChart.options.scales.xAxes[0].time.unit= tcks;
+    myChart.update();
+  }
+}
+
+var Y_MAX=[];
+
+function yaxes(E){
+
+  Y_MAX.forEach(
+    function( v,i ){
+      Y_MAX[i]=0;
+    }
+  );
+
+  E.forEach(
+    function( v,i){
+      v.forEach(
+        function(w,j){
+          if( Y_MAX[ SETUP.dataset[i].yAxes ] < parseFloat(w) ) Y_MAX[ SETUP.dataset[i].yAxes ] = parseFloat(w);
+        }
+      );
+    }
+  );
+
+  Y_MAX.forEach(
+    function( v,i ){
+      Y_MAX[i]=1.2 * Y_MAX[i];
+
+      var factor = Math.pow( 10, parseInt( (Math.log10( Y_MAX[i] )/-1)+1 ) );
+      myChart.options.scales.yAxes[i].ticks.max = parseInt( parseFloat( Y_MAX[i] ) * factor ) / factor ;
+
+      if( $($(".lgtm button")[0]).hasClass("btn-info") == true ){
+        myChart.options.scales.yAxes[i].ticks.min = 0.001;
+        myChart.options.scales.yAxes[i].ticks.max = 1/factor*10;
+      } else {
+        myChart.options.scales.yAxes[i].type="linear";
+      }
+
+    }
+  );
+  myChart.update();
+
+}
+
+
+function extend(obj, src) {
+
+  for (var key in src) {
+      if (src.hasOwnProperty(key)) obj[key] = src[key];
+  }
+  return obj;
+
+}
+
+function json_load( url, type ){
+  var json = null;
+  $.ajax({
+      'type':"GET",
+      'async': false,
+      'global': false,
+      'cache': false,
+      'url': url,
+      'dataType': type,
+      'success': function (data) {
+          json = data;
+      }
+  });
+  return json;
+}
+
+</script>
+</body>

@@ -1,8 +1,9 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <titleFairCoin - Statistics - CoinGecko.com Ranking</title>
+    <title>FairCoin - Statistics - CoinGecko.com Ranking</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="http://fairplayground.info/assets/js/moments.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 
     <script
@@ -95,14 +96,14 @@
           bestv = JJ[2];
           bestv_label = JJ[0];
         }
-        L.push(JJ[0]);
-        D.push(JJ[1]);
-        S.push(JJ[2]);
+        L.push( JJ[0] );
+        D.push( { "x":JJ[0], "y": JJ[1] } );
+        S.push( { "x":JJ[0], "y": JJ[2] } );
       }
     }
   );
 
-  $("#last").text( D[ D.length-1 ] );
+  $("#last").text( D[ D.length-1 ]["y"] );
   $("#last_label").text( L[ D.length-1 ] );
   $("#best").text(best);
   $("#best_label").text(best_label);
@@ -139,7 +140,24 @@
       ]
     },
     options: {
+      responsive: true,
         scales: {
+          xAxes: [{
+						type: "time",
+						time: {
+              displayFormats: {
+                week: 'YYYY-MM-DD'
+              },
+							format: 'YYYY-MM-DD',
+							// round: 'day'
+              unit:'week',
+							tooltipFormat: 'YYYY-MM-DD'
+						},
+						scaleLabel: {
+							display: true,
+							labelString: 'Date'
+						}
+					} ],
           yAxes: [{
               ticks: {
                   suggestedMin: 0,

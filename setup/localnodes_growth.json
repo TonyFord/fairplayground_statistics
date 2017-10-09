@@ -1,0 +1,81 @@
+{
+  "id":"faircoin_prices",
+  "title":"FairCoin - Statistics - Local Nodes Growth",
+  "sources":[
+    {
+      "csv_headline":true,
+      "type":"text",
+      "content_url":"http://api.fairplayground.info/rawdata/localnodes_growth.csv",
+      "content_csv":"",
+      "update": "http://api.fairplayground.info/functions/get_localnodes.php"
+    }
+  ],
+  "dataset":[
+    {
+      "source_id":0,
+      "datacolumn":1,
+      "yAxes":0
+    },
+    {
+      "source_id":0,
+      "datacolumn":2,
+      "yAxes":0
+    }
+  ],
+
+  "chartjs":
+  {
+    "type": "bar",
+    "data": {
+      "datasets": [
+        {
+          "label": "local nodes established"
+        },
+        {
+          "type":"line",
+          "label": "local nodes established ( cum. )",
+          "fill": false,
+          "backgroundColor": "white",
+          "borderColor": "indigo",
+          "borderWidth": 2,
+          "lineTension": 0,
+          "radius": 0,
+          "hitRadius": 3
+        }
+      ]
+    },
+    "options": {
+      "title": {
+        "display": true,
+        "text": "FairCoin - Statistics - Local Nodes Growth"
+      },
+      "responsive": true,
+      "scales": {
+        "xAxes": [
+          {
+            "type": "time",
+            "barThickness":10,
+            "time": {
+              "displayFormats": {},
+              "parser": "YYYY-MM-DD",
+              "unit": "month",
+              "tooltipFormat": "YYYY-MM-DD"
+            },
+            "scaleLabel": {
+              "display": true,
+              "labelString": "Date"
+            }
+          }
+        ],
+        "yAxes": [
+          {
+            "ticks": {
+              "min": 0,
+              "reverse": false
+            }
+          }
+        ]
+      }
+    }
+  }
+}

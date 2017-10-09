@@ -3,6 +3,7 @@
     <meta charset="utf-8"/>
     <title>FairCoin - Statistics - Transactions and Blocks</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="http://fairplayground.info/assets/js/moments.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 
     <script
@@ -50,8 +51,8 @@
     </table>
   </div>
   <div class="col button_api">
-    <a href="http://statistics.fairplayground.info"><button class="btn btn-sm btn-outline-dark">Statistics</button></html>
-    <a href="http://api.fairplayground.info/rawdata/tx_by_day.json"><button class="btn btn-sm btn-outline-primary">API [json]</button></html>
+    <a href="http://statistics.fairplayground.info"><button class="btn btn-sm btn-outline-dark">Statistics</button></a>
+    <a href="http://api.fairplayground.info/rawdata/tx_by_day.json"><button class="btn btn-sm btn-outline-primary">API [json]</button></a>
   </div>
 </div>
 <div class="row">
@@ -78,13 +79,13 @@
 
   J.forEach(
     function(v,i){
-      L.unshift(v.date);
-      D.unshift(v.tx_count - v.blocks);
+      L.unshift( v.date );
+      D.unshift( { "x":v.date, "y": ( v.tx_count - v.blocks) } );
       if( v.tx_count - v.blocks > tx_max ){
         tx_max = v.tx_count - v.blocks;
         tx_max_label = v.date;
       }
-      B.unshift(v.blocks);
+      B.unshift( { "x":v.date, "y":v.blocks } );
       if(i<J.length-6){
         var ma=0;
         for(j=i+6;j>=i;j--){
@@ -94,14 +95,14 @@
           ma_max = Math.round(ma/7);
           ma_max_label=v.date;
         }
-        DA.unshift( Math.round(ma/7) );
+        DA.unshift( { "x":v.date, "y": Math.round(ma/7) } );
       } else {
         DA.unshift("");
       }
     }
   );
 
-  $("#tx_last").text( D[ D.length-1 ] );  // last tx count
+  $("#tx_last").text( D[ D.length-1 ]["y"] );  // last tx count
   $("#tx_last_label").text( L[ D.length-1 ] );  // last tx count
   $("#tx_avg").text( ma_max );
   $("#tx_avg_label").text( ma_max_label );
@@ -143,18 +144,34 @@
     },
     options: {
         scales: {
-            yAxes: [{
-                ticks: {
-                    suggestedMin: 0,
-                    suggestedMax: 500
-                }
-            },{
-                id:"1",
-                ticks: {
-                    suggestedMin: 0,
-                    suggestedMax: 500
-                }
-            }]
+          xAxes: [{
+						type: "time",
+						time: {
+              displayFormats: {
+                week: 'YYYY-MM-DD'
+              },
+							format: 'YYYY-MM-DD',
+							// round: 'day'
+              unit:'week',
+							tooltipFormat: 'YYYY-MM-DD'
+						},
+						scaleLabel: {
+							display: true,
+							labelString: 'Date'
+						}
+					} ],
+          yAxes: [{
+              ticks: {
+                  suggestedMin: 0,
+                  suggestedMax: 500
+              }
+          },{
+              id:"1",
+              ticks: {
+                  suggestedMin: 0,
+                  suggestedMax: 500
+              }
+          }]
         }
     }
   });
