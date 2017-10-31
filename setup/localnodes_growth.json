@@ -1,6 +1,8 @@
 {
   "id":"faircoin_prices",
   "title":"FairCoin - Statistics - Local Nodes Growth",
+  "append_html_url":"http://statistics.fairplayground.info/setup/localnodes_growth.html",
+  "append_js_url":"http://statistics.fairplayground.info/setup/localnodes_growth.js",
   "sources":[
     {
       "csv_headline":true,
@@ -14,12 +16,14 @@
     {
       "source_id":0,
       "datacolumn":1,
-      "yAxes":0
+      "yAxis":0,
+      "xAxis":0
     },
     {
       "source_id":0,
       "datacolumn":2,
-      "yAxes":0
+      "yAxis":0,
+      "xAxis":0
     }
   ],
 
