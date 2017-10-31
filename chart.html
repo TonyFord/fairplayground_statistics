@@ -64,9 +64,11 @@
 <script>
 
 var setup;
+var d_range;
 
 $( document ).ready(function() {
   setup = getURLParameter('s');
+  d_range = getURLParameter('dr');
   if( setup == null ){
     $(".container > .row:nth-child(3) > .col").html("<h3>no setup selected! please append URL parameter ?s={my_setup_id}</h3>");
     console.log("no setup selected");
@@ -85,7 +87,16 @@ $( document ).ready(function() {
   load_sources();
   load_data();
 
-  create_chart( "ALL",0,0);
+  create_chart( ( ( d_range != undefined ) ? d_range: "ALL" ),0,0);
+  if( SETUP.append_html_url != "" && SETUP.append_html_url != undefined ){
+    $($(".row:last-child")[0]).after( json_load( SETUP.append_html_url,"text" ) );
+  }
+  if( SETUP.append_js_url != "" &&  SETUP.append_js_url != undefined ){
+    $("head").append( "<script src=\"" + SETUP.append_js_url + "\"><\/script>" );
+  }
+
+
+  if( typeof ChartOnLoad == "function" ) ChartOnLoad();
 
 });
 
@@ -122,13 +133,16 @@ function load_sources(){
 
     function(v,i){
       var D=json_load( v.content_url , v.type );
-      var D=D.split(/\n/g);
+      if( typeof(D) !== "object" ) var D=D.split(/\n/g);
+
       if( v.csv_headline == true ) D.shift();
 
       i=D.length-1;
-      while( D[i].trim() == "" ){
-        D.pop();
-        i=D.length-1;
+      if( typeof(D) !== "object" ){
+        while( D[i].trim() == "" ){
+          D.pop();
+          i=D.length-1;
+        }
       }
 
       // update script
@@ -155,15 +169,20 @@ function load_data(){
       var DDD=[];
       D.forEach(
         function(w,i){
-          var DD=w.split(/,/g);
-          DDD.push( { "x":DD[0], "y":parseFloat( DD[v.datacolumn] ) } );
+          if( typeof(w) !== "object" ){
+            var DD=w.split(/,/g);
+          } else {
+            var DD=w;
+          }
+          if( DD[v.xAxis] != "" ){
+            DDD.push( { "x":DD[v.xAxis], "y":parseFloat( DD[v.datacolumn] ) } );
+          }
         }
       );
       DATA.push(DDD);
     }
 
   );
-
 }
 
 function create_chart( iv, ivmin, ivmax ){
@@ -276,7 +295,13 @@ function create_chart( iv, ivmin, ivmax ){
 
     SETUP.dataset.forEach(
       function( v,i ){
-        Y_MAX[v.yAxes]=0;
+        Y_MIN[v.yAxis]=99999999999999999;
+      }
+    );
+
+    SETUP.dataset.forEach(
+      function( v,i ){
+        Y_MAX[v.yAxis]=0;
       }
     );
 
@@ -320,6 +345,7 @@ function create_chart( iv, ivmin, ivmax ){
 }
 
 var Y_MAX=[];
+var Y_MIN=[];
 
 function yaxes(E){
 
@@ -329,11 +355,18 @@ function yaxes(E){
     }
   );
 
+  Y_MIN.forEach(
+    function( v,i ){
+      Y_MIN[i]=999999999999999999999999;
+    }
+  );
+
   E.forEach(
     function( v,i){
       v.forEach(
         function(w,j){
-          if( Y_MAX[ SETUP.dataset[i].yAxes ] < parseFloat(w) ) Y_MAX[ SETUP.dataset[i].yAxes ] = parseFloat(w);
+          if( Y_MAX[ SETUP.dataset[i].yAxis ] < parseFloat(w) ) Y_MAX[ SETUP.dataset[i].yAxis ] = parseFloat(w);
+          if( Y_MIN[ SETUP.dataset[i].yAxis ] > parseFloat(w) ) Y_MIN[ SETUP.dataset[i].yAxis ] = parseFloat(w);
         }
       );
     }
@@ -341,14 +374,16 @@ function yaxes(E){
 
   Y_MAX.forEach(
     function( v,i ){
-      Y_MAX[i]=1.2 * Y_MAX[i];
+      Y_MIN[i]=0.8 * Y_MIN[i];
+      //Y_MAX[i]=Math.round( Y_MAX[i] / Math.pow( 10, Y_MAX[i].toString().length-1 ) + 0.5 ) * Math.pow( 10, Y_MAX[i].toString().length-1 );
 
       var factor = Math.pow( 10, parseInt( (Math.log10( Y_MAX[i] )/-1)+1 ) );
-      myChart.options.scales.yAxes[i].ticks.max = parseInt( parseFloat( Y_MAX[i] ) * factor ) / factor ;
+      if( SETUP.chartjs.options.scales.yAxes[i].ticks.max == undefined ) myChart.options.scales.yAxes[i].ticks.max = parseInt( parseFloat( Y_MAX[i] ) * factor ) / factor ;
+      if( SETUP.chartjs.options.scales.yAxes[i].ticks.min == undefined ) myChart.options.scales.yAxes[i].ticks.min = parseInt( parseFloat( Y_MIN[i] ) * factor ) / factor ;
 
       if( $($(".lgtm button")[0]).hasClass("btn-info") == true ){
-        myChart.options.scales.yAxes[i].ticks.min = 0.001;
-        myChart.options.scales.yAxes[i].ticks.max = 1/factor*10;
+        myChart.options.scales.yAxes[i].ticks.min = Y_MIN[i];
+        myChart.options.scales.yAxes[i].ticks.max = parseInt( parseFloat( Y_MAX[i] ) * factor ) / factor ;
       } else {
         myChart.options.scales.yAxes[i].type="linear";
       }
