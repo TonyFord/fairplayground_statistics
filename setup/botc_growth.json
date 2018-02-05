@@ -1,22 +1,22 @@
 {
-  "id":"fcln_growth",
-  "title":"FairCoop - Statistics - Local Nodes Growth",
-  "append_html_url":"http://statistics.fairplayground.info/setup/localnodes_growth.html",
-  "append_js_url":"http://statistics.fairplayground.info/setup/localnodes_growth.js",
+  "id":"botc_growth",
+  "title":"FairProjects - Statistics - BankOfTheCommons growth",
+  "append_html_url":"http://statistics.fairplayground.info/setup/botc_growth.html",
+  "append_js_url":"http://statistics.fairplayground.info/setup/botc_growth.js",
   "sources":[
     {
       "csv_headline":true,
       "type":"text",
-      "content_url":"http://api.fairplayground.info/rawdata/localnodes_growth.csv",
+      "content_url":"http://api.fairplayground.info/rawdata/botc_growth_calc.csv",
       "content_csv":"",
-      "update": "http://api.fairplayground.info/functions/get_localnodes.php"
+      "update": ""
     }
   ],
   "dataset":[
     {
       "source_id":0,
       "datacolumn":1,
-      "yAxis":0,
+      "yAxis":"y1",
       "xAxis":0
     },
     {
@@ -33,11 +33,11 @@
     "data": {
       "datasets": [
         {
-          "label": "local nodes established"
+          "label": "BotC members new registered"
         },
         {
           "type":"line",
-          "label": "local nodes established ( cum. )",
+          "label": "BotC members registered ( cum. )",
           "fill": false,
           "backgroundColor": "white",
           "borderColor": "indigo",
@@ -51,7 +51,7 @@
     "options": {
       "title": {
         "display": true,
-        "text": "FairCoop - Statistics - Local Nodes Growth"
+        "text": "FairProjects - Statistics - BankOfTheCommons growth"
       },
       "responsive": true,
       "scales": {
@@ -75,6 +75,14 @@
           {
             "ticks": {
               "min": 0,
+              "reverse": false
+            }
+          },
+          {
+            "id":"y1",
+            "ticks": {
+              "min": 0,
+              "max": 10,
               "reverse": false
             }
           }

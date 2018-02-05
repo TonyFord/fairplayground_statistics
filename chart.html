@@ -4,7 +4,7 @@
     <title></title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <script src="http://fairplayground.info/assets/js/moments.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
 
     <script
          src="https://code.jquery.com/jquery-1.11.2.min.js"
@@ -378,7 +378,7 @@ function yaxes(E){
       //Y_MAX[i]=Math.round( Y_MAX[i] / Math.pow( 10, Y_MAX[i].toString().length-1 ) + 0.5 ) * Math.pow( 10, Y_MAX[i].toString().length-1 );
 
       var factor = Math.pow( 10, parseInt( (Math.log10( Y_MAX[i] )/-1)+1 ) );
-      if( SETUP.chartjs.options.scales.yAxes[i].ticks.max == undefined ) myChart.options.scales.yAxes[i].ticks.max = parseInt( parseFloat( Y_MAX[i] ) * factor ) / factor ;
+      if( SETUP.chartjs.options.scales.yAxes[i].ticks.max == undefined ) myChart.options.scales.yAxes[i].ticks.max = 1.2 * parseInt( parseFloat( Y_MAX[i] ) * factor ) / factor ;
       if( SETUP.chartjs.options.scales.yAxes[i].ticks.min == undefined ) myChart.options.scales.yAxes[i].ticks.min = parseInt( parseFloat( Y_MIN[i] ) * factor ) / factor ;
 
       if( $($(".lgtm button")[0]).hasClass("btn-info") == true ){
