@@ -1,0 +1,76 @@
+{
+  "id":"blocktimes",
+  "title":"Timedifference between blocks",
+  "append_html_url":"",
+  "append_js_url":"",
+  "sources":[
+    {
+      "csv_headline":true,
+      "type":"text",
+      "content_url":"http://api.fairplayground.info/rawdata/blocktime.csv",
+      "content_csv":"",
+      "update": ""
+    }
+  ],
+  "dataset":[
+    {
+      "source_id":0,
+      "datacolumn":1,
+      "yAxis":0,
+      "xAxis":0
+    }
+
+  ],
+
+  "chartjs":
+  {
+    "type": "line",
+    "data": {
+      "datasets": [
+        {
+          "label": "blocktime in seconds ",
+          "fill": false,
+          "backgroundColor": "transparent",
+          "borderColor": "indigo",
+          "borderWidth": 2,
+          "lineTension": 0,
+          "radius": 3,
+          "hitRadius": 3,
+          "hidden": false,
+          "showLine": false
+        }
+
+      ]
+    },
+    "options": {
+      "title": {
+        "display": true,
+        "text": "FairCoin - abnormal timedifferences between blocks ( updated daily )"
+      },
+      "responsive": true,
+      "scales": {
+        "xAxes": [
+          {
+            "type": "linear",
+            "barThickness":2,
+            "scaleLabel": {
+              "display": true,
+              "labelString": "Block"
+            }
+          }
+        ],
+        "yAxes": [
+          {
+            "type": "logarithmic",
+            "ticks": {
+              "min": 0,
+              "max": 20000,
+              "reverse": false
+            }
+          }
+
+        ]
+      }
+    }
+  }
+}

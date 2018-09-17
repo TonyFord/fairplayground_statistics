@@ -33,7 +33,9 @@
     "data": {
       "datasets": [
         {
-          "label": "BotC members new registered"
+          "label": "BotC members new registered",
+          "yAxisID" : "y1",
+          "borderWidth": 1
         },
         {
           "type":"line",
@@ -58,7 +60,7 @@
         "xAxes": [
           {
             "type": "time",
-            "barThickness":10,
+            "barThickness":2,
             "time": {
               "displayFormats": {},
               "parser": "YYYY-MM-DD",

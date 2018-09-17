@@ -1,10 +1,10 @@
 function ChartOnLoad(){
 
-  var J=json_load("http://api.fairplayground.info/rawdata/FCLN.geo.json","json");
+  var J=json_load("http://fairplayground.info/datasources/FCLN/FCLN.geo.json","json");
 
   var K=[];
 
-  var J=J.features[0];
+  //var J=J.features[0];
 
   J.forEach(
     function( v,i ){

@@ -1,20 +1,15 @@
 {
-  "id":"faircoin_prices",
-  "title":"FairCoin - Statistics - Prices ( updated daily )",
+  "id":"fairmarket_growth",
+  "title":"FairProjects - Statistics - market.fair.coop growth",
+  "append_html_url":"",
+  "append_js_url":"",
   "sources":[
     {
       "csv_headline":true,
       "type":"text",
-      "content_url":"http://api.fairplayground.info/rawdata/faircoin_prices.csv",
+      "content_url":"http://api.fairplayground.info/rawdata/fairmarket_growth.csv",
       "content_csv":"",
-      "update": "http://api.fairplayground.info/functions/get_prices.php"
-    },
-    {
-      "csv_headline":true,
-      "type":"text",
-      "content_url":"http://fairplayground.info/datasources/FCLN/localnodes_growth.csv",
-      "content_csv":"",
-      "update": ""
+      "update": "http://api.fairplayground.info/functions/get_fairmarket_growth.php"
     }
   ],
   "dataset":[
@@ -35,33 +30,17 @@
       "datacolumn":3,
       "yAxis":0,
       "xAxis":0
-    },
-    {
-      "source_id":1,
-      "datacolumn":2,
-      "yAxis":"localnodes",
-      "xAxis":0
     }
   ],
 
   "chartjs":
   {
-    "type": "line",
+    "type": "bar",
     "data": {
       "datasets": [
         {
-          "label": "daily price in USD",
-          "fill": false,
-          "backgroundColor": "white",
-          "borderColor": "seagreen",
-          "borderWidth": 2,
-          "lineTension": 0,
-          "radius": 0,
-          "hitRadius": 3,
-          "hidden": true
-        },
-        {
-          "label": "daily price in EUR",
+          "type":"line",
+          "label": "purchases",
           "fill": false,
           "backgroundColor": "white",
           "borderColor": "indigo",
@@ -71,21 +50,22 @@
           "hitRadius": 3
         },
         {
-          "label": "official price in EUR",
+          "type":"line",
+          "label": "shops",
           "fill": false,
           "backgroundColor": "white",
-          "borderColor": "goldenrod",
+          "borderColor": "MediumAquamarine",
           "borderWidth": 2,
           "lineTension": 0,
           "radius": 0,
           "hitRadius": 3
         },
         {
-          "yAxisID": "localnodes",
-          "label": "local nodes established ( cum. )",
+          "type":"line",
+          "label": "products",
           "fill": false,
           "backgroundColor": "white",
-          "borderColor": "fuchsia",
+          "borderColor": "DarkCyan",
           "borderWidth": 2,
           "lineTension": 0,
           "radius": 0,
@@ -96,13 +76,14 @@
     "options": {
       "title": {
         "display": true,
-        "text": "FairCoin - Statistics - Prices ( updated daily )"
+        "text": "FairProjects - Statistics - market.fair.coop growth"
       },
       "responsive": true,
       "scales": {
         "xAxes": [
           {
             "type": "time",
+            "barThickness":2,
             "time": {
               "displayFormats": {},
               "parser": "YYYY-MM-DD",
@@ -119,15 +100,6 @@
           {
             "ticks": {
               "min": 0,
-              "max": 1.5,
-              "reverse": false
-            }
-          },
-          {
-            "id" : "localnodes",
-            "ticks": {
-              "min": 0,
-              "max": 150,
               "reverse": false
             }
           }

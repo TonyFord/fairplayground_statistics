@@ -1,66 +1,76 @@
 {
-  "id":"fcln_growth",
-  "title":"FairCoop - Statistics - Local Nodes Growth",
-  "append_html_url":"http://statistics.fairplayground.info/setup/localnodes_growth.html",
-  "append_js_url":"http://statistics.fairplayground.info/setup/localnodes_growth.js",
+  "id":"blocktimes",
+  "title":"Timedifference between blocks",
+  "append_html_url":"",
+  "append_js_url":"",
   "sources":[
     {
       "csv_headline":true,
       "type":"text",
-      "content_url":"http://fairplayground.info/datasources/FCLN/localnodes_growth.csv",
+      "content_url":"http://api.fairplayground.info/rawdata/tx_by_day.csv",
       "content_csv":"",
-      "update": "http://api.fairplayground.info/functions/get_localnodes.php"
+      "update": ""
     }
   ],
   "dataset":[
     {
       "source_id":0,
-      "datacolumn":1,
+      "datacolumn":5,
       "yAxis":0,
       "xAxis":0
     },
     {
       "source_id":0,
-      "datacolumn":2,
-      "yAxis":0,
+      "datacolumn":6,
+      "yAxis":"y1",
       "xAxis":0
     }
+
   ],
 
   "chartjs":
   {
-    "type": "bar",
+    "type": "line",
     "data": {
       "datasets": [
         {
-          "label": "local nodes established",
-          "yAxisID": "y1",
-          "borderWidth": 1
-        },
-        {
-          "type":"line",
-          "label": "local nodes established ( cum. )",
+          "label": "number of block lags by day",
           "fill": false,
-          "backgroundColor": "white",
-          "borderColor": "indigo",
+          "backgroundColor": "transparent",
+          "borderColor": "slateblue",
           "borderWidth": 2,
           "lineTension": 0,
-          "radius": 0,
-          "hitRadius": 3
+          "radius": 3,
+          "hitRadius": 3,
+          "hidden": false,
+          "showLine": true
+        },
+        {
+          "yAxisID" : "y1",
+          "label": "block lags lost time by day in seconds ",
+          "fill": false,
+          "backgroundColor": "transparent",
+          "borderColor": "goldenrod",
+          "borderWidth": 2,
+          "lineTension": 0,
+          "radius": 3,
+          "hitRadius": 3,
+          "hidden": false,
+          "showLine": true
         }
+
       ]
     },
     "options": {
       "title": {
         "display": true,
-        "text": "FairCoop - Statistics - Local Nodes Growth"
+        "text": "FairCoin - abnormal timedifferences between blocks ( updated daily )"
       },
       "responsive": true,
       "scales": {
         "xAxes": [
           {
             "type": "time",
-            "barThickness":2,
             "time": {
               "displayFormats": {},
               "parser": "YYYY-MM-DD",
@@ -77,17 +87,19 @@
           {
             "ticks": {
               "min": 0,
+              "max": 200,
               "reverse": false
             }
           },
           {
-            "id":"y1",
+            "id": "y1",
             "ticks": {
               "min": 0,
-              "max": 6,
+              "max": 10000,
               "reverse": false
             }
           }
+
         ]
       }
     }
